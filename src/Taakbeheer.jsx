@@ -1,10 +1,14 @@
 import { useState } from "react"
+import useLocalStorage from "../../state-en-hooks/src/hooks/useLocalStorage"
+import AddTodoInput from "./AddTodoInput"
+import TaskFilters from "./TaskFIlters"
+import TaskList from "./TaskList"
 
 export default function Taakbeheer() {
 
     const [nieuweTaak, setNieuweTaak] = useState('')
 
-    const [taken, setTaken] = useState([
+    const [taken, setTaken] = useLocalStorage("taken", [
 
         { id: 1, taak: "Gras maaien", voltooid: false },
         { id: 2, taak: "Huiswerk maken", voltooid: false },
@@ -14,7 +18,7 @@ export default function Taakbeheer() {
 
     const takenInputChange = (e) => setNieuweTaak(e.target.value)
 
-
+    const [filter, setFilter] = useState("alle")
 
     const handleAdd = (e) => {
         e.preventDefault()
@@ -46,35 +50,28 @@ export default function Taakbeheer() {
             }
             return item
         }))
-
     }
 
+    const gefilterdeTaken = taken.filter((item) => {
+        if (filter == "voltooid")
+            return item.voltooid
+        if (filter == "niet")
+            return !item.voltooid
+        return true
+    })
+
     return (
-        <>
+        <div className="m-5">
 
             <h1>Takenbeheer App</h1>
-            <button>Alle taken</button>
-            <button>Voltooide taken</button>
-            <button>Niet voltooide taken</button>
+            <TaskFilters setFilter={setFilter} />
 
-            <br /> <br />
+            <AddTodoInput onChange={takenInputChange} value={nieuweTaak} />
+            <button className="btn btn-dark mb-2" onClick={handleAdd}>Toevoegen</button>
 
-            <input onChange={takenInputChange} type="text" value={nieuweTaak} placeholder="Voeg een nieuwe taak toe..." />
+            <TaskList toggleVoltooid={toggleVoltooid} handleDelete={handleDelete} />
+            {/* hier werkt iets nog niet drm wit scherm */}
 
-            <button onClick={handleAdd}>Toevoegen</button>
-
-            <div>
-                {taken.map((item) => (
-                    <p key={item.id}>
-                        {item.taak}
-                        <button onClick={() => toggleVoltooid(item.id)}>{item.voltooid ? 'voltooid' : 'voltooien'}</button>
-                        <button onClick={() => handleDelete(item.id)}>Verwijderen</button>
-                    </p>))}
-
-
-
-            </div>
-
-        </>
+        </div>
     )
 }
